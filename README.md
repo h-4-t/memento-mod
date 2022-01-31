@@ -13,7 +13,10 @@ Please head to https://signup.memento.ma and register your email if you're inter
 
 Memento is a cloud-based HUD for The Binding of Isaac game (AB+/Repentance). It gives you the ability to **track** your skill progress over time, to **share** your live/best runs to your friends, and **help** the community to explore the beautiful complexity and randomness of this game.
 
-A demo is available here https://www.youtube.com/watch?v=jIz0HR7KQFY  (Full run here : https://www.youtube.com/watch?v=4lvPnX6GwfQ )
+Demo
+
+
+[![Local Demo](http://img.youtube.com/vi/jIz0HR7KQFY/0.jpg)](http://www.youtube.com/watch?v=jIz0HR7KQFY "Local Demo")
 
 If you're a modder/speedrunner/dev, please check below and PM me \o/
 
@@ -36,7 +39,7 @@ The current repository shows what and how it sends the game's data live to the c
 
 For the technicalities, the mod **reads game's data** and send it in TCP to a **cloud-based Golang backend server**. It does its magic with the data, and send it to a **VueJS frontend webpage** that graphs it live.
 
-For obvious security reason, the backend is currently **closed-source** and it is structured in as following:
+For obvious security reason, the backend is currently **closed-source** and it is structured in dev as following:
 ```
 .
 ├── api-live                <- Handling live data from cache + write to DB + websockets
@@ -44,10 +47,8 @@ For obvious security reason, the backend is currently **closed-source** and it i
 ├── api-tcp                 <- TCP service live data + write to cache
 ├── api-user                <- Handling user data + invites
 ├── data                    <- local data storage
-├── docker-compose.prod     <- Prod docker-compose
 ├── docker-compose.yml      <- Dev docker-compose
 ├── front-landing           <- Landing frontend
-├── front-live              <- Live frontend
 ├── front-quasar            <- Beta frontend
 ├── notes.md                <- General notes
 ├── testtcp.py              <- TCP testing
