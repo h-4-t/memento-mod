@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata>
+    <name>Memento</name>
+    <directory>memento</directory>
+    <id>0</id>
+    <description>Isaac's Diary</description>
+    <version>0.9</version>
+    <visibility>Public</visibility>
+    <tag id="Lua"/>
+</metadata>

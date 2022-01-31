@@ -1,0 +1,14 @@
+{
+    "Lua.diagnostics.globals": [
+		"RoomType",
+        "Game",
+        "REPENTANCE",
+        "Isaac",
+        "RNG",
+        "ModCallbacks",
+        "RegisterMod",
+        "Sprite",
+        "Vector"
+
+    ]
+}
