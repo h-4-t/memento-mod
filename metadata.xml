@@ -4,7 +4,7 @@
     <directory>memento</directory>
     <id>0</id>
     <description>Isaac's Diary</description>
-    <version>0.9</version>
+    <version>1.0</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
 </metadata>

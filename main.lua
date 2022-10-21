@@ -1,36 +1,21 @@
 -- require('mobdebug').start()
 -- StartDebug()
-local mod = RegisterMod("isaac-memento", 1)
+Memento = RegisterMod("isaac-memento", 1) 
+local mod = Memento
 
-require "data"
+require "mem_config"
+require "mem_tcp"
+require "mem_data"
 
-Tcpclient = nil
+Memento.Tcpclient = nil
+Memento.InitialInit = false
+Memento.IsItContinue = false
 
-require "srv"
-
-InitialInit = false
-local text2print = Game():GetSeeds():GetStartSeedString()
-IsItContinue = false
-
-IconSprite = Sprite()
-IconSprite:Load("icon.anm2", true)
-
-function mod:init(player)
-    Isaac.DebugString("Initialize networking...")
-
-    TryConnect(false)
-end
-
-function mod:render()
-    if Tcpclient then
-        IconSprite:Update()
-        IconSprite:Render(Vector(4, 4), Vector(0, 0), Vector(0, 0))
-
-    end
-
-end
+Memento.IconSprite = Sprite()
+Memento.IconSprite:Load("mem_icon.anm2", true)
 
 -- init local variables
+-- local text2print = Game():GetSeeds():GetStartSeedString()
 local lastCharge = {}
 local lastHealth = {}
 local lastStats = {}
@@ -46,6 +31,22 @@ lastHealth.cooldown = daba
 lastStats.cooldown = daba
 lastLoot.cooldown = daba
 lastItems.cooldown = daba
+
+function mod:init(player)
+    Isaac.DebugString("Initialize networking...")
+
+    Memento:TryConnect(false)
+end
+
+function mod:render()
+    if Memento.Tcpclient then
+        Memento.IconSprite:Update()
+        Memento.IconSprite:Render(Vector(4, 4), Vector(0, 0), Vector(0, 0))
+    end
+    if Memento.Token == "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" then
+        Isaac.RenderText("[Memento] Invalid Token", 0, 0, 1, 1, 1, 255)
+    end
+end
 
 -- https://www.luafaq.org/#T1.15
 -- used to compare change in stats in strings O(1) vs deep compare O(n)
@@ -64,106 +65,65 @@ local function dump(o)
     end
 end
 
-local function sendAll()
-    SendMessage(GetSeed())
-    SendMessage(GetLevel())
-    SendMessage(GetRoom())
+function Memento:sendAll()
+    Memento:SendMessage(Memento:GetSeed())
+    Memento:SendMessage(Memento:GetLevel())
+    Memento:SendMessage(Memento:GetRoom())
     local current_l = Game():GetLevel():GetAbsoluteStage()
     local current_r = Game():GetLevel():GetCurrentRoomIndex()
     for i = 0, Game():GetNumPlayers() - 1 do
 
-        local tosend = GetCharge(i)
+        local tosend = Memento:GetCharge(i)
         tosend.level = current_l
         tosend.room = current_r
-        SendMessage(tosend)
+        Memento:SendMessage(tosend)
 
-        tosend = GetHealth(i)
+        tosend = Memento:GetHealth(i)
         tosend.level = current_l
         tosend.room = current_r
-        SendMessage(tosend)
+        Memento:SendMessage(tosend)
 
-        tosend = GetPlayer(i)
+        tosend = Memento:GetPlayer(i)
         tosend.level = current_l
         tosend.room = current_r
-        SendMessage(tosend)
+        Memento:SendMessage(tosend)
 
-        tosend = GetItems(i)
+        tosend = Memento:GetItems(i)
         tosend.level = current_l
         tosend.room = current_r
-        SendMessage(tosend)
+        Memento:SendMessage(tosend)
 
-        tosend = GetLoot(i)
+        tosend = Memento:GetLoot(i)
         tosend.level = current_l
         tosend.room = current_r
-        SendMessage(tosend)
+        Memento:SendMessage(tosend)
 
     end
 
 end
 
 function mod:update()
-    if Tcpclient then
-        local cmd, err = Tcpclient:receive("*line")
-        if err and err ~= "timeout" then
-            Isaac.DebugString("CLI: " .. err)
-
-            Tcpclient = nil
-            return
-        end
-
-        if cmd then
-            Isaac.DebugString("Received command: " .. tostring(cmd))
-            _G["mod"] = mod
-            local ok, err = pcall(function()
-                local command, err = load("return " .. cmd)
-                if command then
-                    local data = command()
-                    if data.type == "text2print" then
-                        text2print = tostring(data.code)
-                        if text2print == "plzRegister" then
-                            --- disable mod 
-                            Game():GetHUD():ShowFortuneText("Memento", "Please register")
-                            mod:RemoveCallback(ModCallbacks.MC_POST_PLAYER_INIT, mod.init)
-                            mod:RemoveCallback(ModCallbacks.MC_POST_UPDATE, mod.update)
-                            mod:RemoveCallback(ModCallbacks.MC_POST_RENDER, mod.render)
-                        else
-                            Game():GetHUD():ShowFortuneText(text2print)
-                        end
-                    end
-                else
-                    SendMessage {
-                        type = "err-status",
-                        msg = ("Failed to unpack data: " .. tostring(err))
-                    }
-                end
-            end)
-            if not ok then
-                SendMessage {
-                    type = "err-status",
-                    msg = err or "Unknown error!"
-                }
-            end
-            _G["mod"] = nil
-        end
-    else
-        if Isaac.GetFrameCount() % 60 == 0 then
-            TryConnect(false)
-        end
+    if Memento.Token == "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" then
+        Memento:ClearCallback()
     end
 
+    -- if Isaac.GetFrameCount() % 60 == 0 then
+    --     Memento:TryConnect(false)
+    -- end
     if Isaac.GetFrameCount() < 10 then
         return
     end
+
 
     local l = Game():GetLevel()
     local r = l:GetCurrentRoomDesc()
     local s = Game():GetSeeds()
     local t = (Game().TimeCounter) / 30
 
-    if InitialInit then
+    if Memento.InitialInit then
         -- Show Icon in HUD
-        if Tcpclient then
-            IconSprite:Play("icon", true)
+        if Memento.Tcpclient then
+            Memento.IconSprite:Play("icon", true)
         end
 
         -- Inform the server that game has started
@@ -171,67 +131,75 @@ function mod:update()
             type = "game-status",
             status = "started",
             difficulty = Game().Difficulty,
-            continue = IsItContinue,
-            player = Game():GetPlayer(0):GetPlayerType()
+            continue = Memento.IsItContinue,
+            name = Game():GetPlayer(0):GetPlayerType()
         }
         if REPENTANCE then
             msg.isaac = "Repentance"
         else
             msg.isaac = "AB+"
         end
-        -- TryConnect(false)
-        SendMessage(msg)
+        -- Memento:TryConnect(false)
+        Memento:SendMessage(msg)
 
-        sendAll()
         -- Initialize global variables
         for i = 0, Game():GetNumPlayers() - 1 do
-            lastCharge[i] = GetCharge(i)
-            lastHealth[i] = GetHealth(i)
-            lastStats[i] = GetPlayer(i)
-            lastLoot[i] = GetLoot(i)
-            lastItems[i] = GetItems(i)
+            lastCharge[i] = Memento:GetCharge(i)
+            lastHealth[i] = Memento:GetHealth(i)
+            lastStats[i] = Memento:GetPlayer(i)
+            lastLoot[i] = Memento:GetLoot(i)
+            lastItems[i] = Memento:GetItems(i)
         end
 
-        lastSeed = GetSeed()
+        lastSeed = Memento:GetSeed()
         lastStage = Game():GetLevel():GetAbsoluteStage()
+		
+		local daba = (Game().TimeCounter) / 30
+		lastCharge.cooldown = daba
+		lastHealth.cooldown = daba
+		lastStats.cooldown = daba
+		lastLoot.cooldown = daba
+		lastItems.cooldown = daba
 
-        InitialInit = false
-        -- Game():GetHUD():ShowFortuneText("Memento", "Up and recording!")    
+        Memento.InitialInit = false
+
+        Memento:sendAll()
+        -- Game():GetHUD():ShowFortuneText("Memento", "Up and running!")    
     else
-        if Game():GetLevel():GetAbsoluteStage() ~= lastStage then
-            sendAll()
-            lastStage = Game():GetLevel():GetAbsoluteStage()
-        else
+        -- if Game():GetLevel():GetAbsoluteStage() ~= lastStage then
+        --     Memento:sendAll()
+        --     lastStage = Game():GetLevel():GetAbsoluteStage()
+        -- else
             for i = 0, Game():GetNumPlayers() - 1 do
                 local p = Game():GetPlayer(i)
 
                 if (t - lastCharge.cooldown > 0.5) then
 
-                    if (dump(GetCharge(i)) ~= dump(lastCharge[i])) then
-                        local tosend = GetCharge(i)
+                    if (dump(Memento:GetCharge(i)) ~= dump(lastCharge[i])) then
+                        local tosend = Memento:GetCharge(i)
                         -- append room and level info
                         tosend.level = l:GetAbsoluteStage()
                         tosend.room = l:GetCurrentRoomIndex()
 
-                        SendMessage(tosend)
+                        Memento:SendMessage(tosend)
 
-                        lastCharge[i] = GetCharge(i)
+                        lastCharge[i] = Memento:GetCharge(i)
                         lastCharge.cooldown = t
                     end
                 end
 
                 if (t - lastHealth.cooldown > 0.5) then
 
-                    if (dump(GetHealth(i)) ~= dump(lastHealth[i])) then
+                    if (dump(Memento:GetHealth(i)) ~= dump(lastHealth[i])) then
 
-                        local tosend = GetHealth(i)
+                        local tosend = Memento:GetHealth(i)
                         -- append room and level info
                         tosend.level = l:GetAbsoluteStage()
                         tosend.room = l:GetCurrentRoomIndex()
 
-                        SendMessage(tosend)
+                        Memento:SendMessage(tosend)
 
-                        lastHealth[i] = GetHealth(i)
+                        lastHealth[i] = Memento:GetHealth(i)
                         lastHealth.cooldown = t
 
                     end
@@ -239,53 +207,52 @@ function mod:update()
 
                 if (t - lastStats.cooldown > 0.5) then
 
-                    if (dump(GetPlayer(i)) ~= dump(lastStats[i])) then
+                    if (dump(Memento:GetPlayer(i)) ~= dump(lastStats[i])) then
 
-                        local tosend = GetPlayer(i)
+                        local tosend = Memento:GetPlayer(i)
                         -- append room and level info
                         tosend.level = l:GetAbsoluteStage()
                         tosend.room = l:GetCurrentRoomIndex()
 
-                        SendMessage(tosend)
+                        Memento:SendMessage(tosend)
 
-                        lastStats[i] = GetPlayer(i)
+                        lastStats[i] = Memento:GetPlayer(i)
                         lastStats.cooldown = t
                     end
                 end
 
                 if (t - lastItems.cooldown > 0.5) then
-                    if (dump(GetItems(i)) ~= dump(lastItems[i])) then
-                        local tosend = GetItems(i)
+                    if (dump(Memento:GetItems(i)) ~= dump(lastItems[i])) then
+                        local tosend = Memento:GetItems(i)
                         -- append room and level info
                         tosend.level = l:GetAbsoluteStage()
                         tosend.room = l:GetCurrentRoomIndex()
 
-                        SendMessage(tosend)
+                        Memento:SendMessage(tosend)
 
-                        lastItems[i] = GetItems(i)
+                        lastItems[i] = Memento:GetItems(i)
                         lastItems.cooldown = t
                     end
                 end
 
                 if (t - lastLoot.cooldown > 0.5) then
-                    if (dump(GetLoot(i)) ~= dump(lastLoot[i])) then
-                        local tosend = GetLoot(i)
+                    if (dump(Memento:GetLoot(i)) ~= dump(lastLoot[i])) then
+                        local tosend = Memento:GetLoot(i)
                         -- append room and level info
                         tosend.level = l:GetAbsoluteStage()
                         tosend.room = l:GetCurrentRoomIndex()
 
-                        SendMessage(tosend)
+                        Memento:SendMessage(tosend)
 
-                        lastLoot[i] = GetLoot(i)
+                        lastLoot[i] = Memento:GetLoot(i)
                         lastLoot.cooldown = t
                     end
                 end
-            end
+            -- end
 
-            if s:IsInitialized() == true and (dump(GetSeed()) ~= dump(lastSeed)) then
-                SendMessage(GetSeed())
-                lastSeed = GetSeed()
-
+            if s:IsInitialized() == true and (dump(Memento:GetSeed()) ~= dump(lastSeed)) then
+                Memento:SendMessage(Memento:GetSeed())
+                lastSeed = Memento:GetSeed()
             end
 
         end
@@ -304,18 +271,19 @@ local function onStart(_, bool)
         continue = bool,
         difficulty = Game().Difficulty,
         session_timeplayed = Isaac.GetFrameCount() / 60,
-        player = Game():GetPlayer(0):GetPlayerType()
+        name = Game():GetPlayer(0):GetPlayerType(),
+		challenge = Isaac.GetChallenge()
     }
-    IsItContinue = bool
+    Memento.IsItContinue = bool
     if REPENTANCE then
         msg.isaac = "Repentance"
     else
         msg.isaac = "AB+"
     end
-    TryConnect(true)
+    Memento:TryConnect(true)
 
-    SendMessage(msg)
-    InitialInit = true
+    Memento:SendMessage(msg)
+    -- clearVars()
 end
 
 local function onEnd(_, bool)
@@ -326,16 +294,18 @@ local function onEnd(_, bool)
         continue = false,
         difficulty = Game().Difficulty,
         session_timeplayed = Isaac.GetFrameCount() / 60,
-        player = Game():GetPlayer(0):GetPlayerType()
+        name = Game():GetPlayer(0):GetPlayerType(),
+		challenge = Isaac.GetChallenge()
     }
     if REPENTANCE then
         msg.isaac = "Repentance"
     else
         msg.isaac = "AB+"
     end
-    SendMessage(msg)
+    Memento:SendMessage(msg)
+    Memento.InitialInit = false
 
-    InitialInit = false
+    -- clearVars()
 end
 
 local function onExit(_, bool)
@@ -345,28 +315,54 @@ local function onExit(_, bool)
         continue = bool,
         difficulty = Game().Difficulty,
         session_timeplayed = Isaac.GetFrameCount() / 60,
-        player = Game():GetPlayer(0):GetPlayerType()
+        name = Game():GetPlayer(0):GetPlayerType(),
+		challenge = Isaac.GetChallenge()
     }
     if REPENTANCE then
         msg.isaac = "Repentance"
     else
         msg.isaac = "AB+"
     end
-    SendMessage(msg)
+    Memento:SendMessage(msg)
+    Memento.InitialInit = false
 
-    InitialInit = false
+    -- clearVars()
 end
 
 local function onNewLevel()
-    -- sendAll()
-    SendMessage(GetLevel())
-    SendMessage(GetRoom())
+    Memento:sendAll()
+    -- Memento:SendMessage(GetLevel())
+    -- Memento:SendMessage(GetRoom())
+end
 
+-- local function clearVars()
+-- 	-- init local variables
+-- 	lastCharge = {}
+-- 	lastHealth = {}
+-- 	lastStats = {}
+-- 	lastLoot = {}
+-- 	lastSeed = {}
+-- 	lastItems = {}
+-- 	lastStage = {}
+
+-- 	InitialInit = true
+
+-- end
+
+function Memento:ClearCallback()
+    mod:RemoveCallback(ModCallbacks.MC_POST_PLAYER_INIT, mod.init)
+    mod:RemoveCallback(ModCallbacks.MC_POST_UPDATE, mod.update)
+    -- mod:RemoveCallback(ModCallbacks.MC_POST_RENDER, mod.render) 
+    mod:RemoveCallback(ModCallbacks.MC_POST_GAME_STARTED, onStart)
+    mod:RemoveCallback(ModCallbacks.MC_POST_GAME_END, onEnd)
+    mod:RemoveCallback(ModCallbacks.MC_PRE_GAME_EXIT, onExit)
+    -- mod:RemoveCallback(ModCallbacks.MC_POST_NEW_LEVEL, onNewLevel)
+    mod:RemoveCallback(ModCallbacks.MC_POST_NEW_ROOM, onNewRoom)
 end
 
 local function onNewRoom()
 
-    local room = GetRoom()
+    local room = Memento:GetRoom()
     if not room.Clear then
         local entities = {}
         for _, v in pairs(Isaac.GetRoomEntities()) do
@@ -384,15 +380,14 @@ local function onNewRoom()
 
     end
 
-    SendMessage(room)
+    Memento:SendMessage(room)
 
 end
 
 mod:AddCallback(ModCallbacks.MC_POST_GAME_STARTED, onStart)
 mod:AddCallback(ModCallbacks.MC_POST_GAME_END, onEnd)
 mod:AddCallback(ModCallbacks.MC_PRE_GAME_EXIT, onExit)
--- unreliable? sometimes doesn't trigger (after a reset for example)
--- mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, onNewLevel)
+mod:AddCallback(ModCallbacks.MC_POST_NEW_LEVEL, onNewLevel)
 mod:AddCallback(ModCallbacks.MC_POST_NEW_ROOM, onNewRoom)
 
 for i, v in pairs(ModCallbacks) do
@@ -402,8 +397,8 @@ for i, v in pairs(ModCallbacks) do
             local ok, result = pcall(function()
                 mod[i](table.unpack(args))
             end)
-            if not ok and Tcpclient then
-                SendMessage {
+            if not ok and Memento.Tcpclient then
+                Memento:SendMessage {
                     type = "err",
                     token = Token,
                     msg = "Failed to execute " .. v .. ": " .. tostring(result)

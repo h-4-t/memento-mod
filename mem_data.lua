@@ -9,7 +9,7 @@ local function cntBits(num)
     return r
 end
 
-function GetHealth(playerid)
+function Memento:GetHealth(playerid)
     local p = Game():GetPlayer(playerid)
 
     local msg = {
@@ -25,22 +25,22 @@ function GetHealth(playerid)
         life = p:GetExtraLives(),
         has_fullred = p:HasFullHearts(),
         has_fullredsoul = p:HasFullHeartsAndSoulHearts(),
-        bone = p:GetBoneHearts(),
-        max_all = p:GetEffectiveMaxHearts(),
         jar_hearts = p:GetJarHearts() 
     }
     if REPENTANCE then
+		msg.bone = p:GetBoneHearts()
         msg.broken = p:GetBrokenHearts()
         msg.rotten = p:GetRottenHearts()
         msg.soul_charge = p:GetSoulCharge()
         msg.soul_effective = p:GetSoulCharge()
         msg.blood_charge = p:GetBloodCharge()
         msg.poop_mana =  p:GetPoopMana()
+		msg.max_all = p:GetEffectiveMaxHearts()
     end
     return msg
 end
 
-function GetPlayer(playerid)
+function Memento:GetPlayer(playerid)
     local p = Game():GetPlayer(playerid)
     
     local msg = {
@@ -51,6 +51,7 @@ function GetPlayer(playerid)
         maxfiredelay = p.MaxFireDelay,
         movespeed = p.MoveSpeed,
         shotspeed = p.ShotSpeed,
+        --firedelay = p.FireDelay,
         tearflags = p.TearFlags,
         tearheight = p.TearHeight,
         tearfallingspeed = p.TearFallingSpeed,
@@ -65,7 +66,7 @@ function GetPlayer(playerid)
     return msg
 end
 
-function GetSeed()
+function Memento:GetSeed()
     local s = Game():GetSeeds()
     local l = Game():GetLevel()
 
@@ -83,7 +84,7 @@ function GetSeed()
     return msg
 end
 
-function GetLoot(playerid)
+function Memento:GetLoot(playerid)
     local p = Game():GetPlayer(playerid)
     local msg = {
         type = "loot-p"..playerid,
@@ -92,24 +93,22 @@ function GetLoot(playerid)
         count_keys = p:GetNumKeys(),
         has_gold_key = p:HasGoldenKey(),
         has_gold_bomb = p:HasGoldenBomb(),
+        --is_holdingitem = p:IsHoldingItem(),
         count_collectible = p:GetCollectibleCount()
     }
     return msg
 end
 
-function GetMaxCollectibleID()
+local function GetMaxCollectibleID()
     return Isaac.GetItemConfig():GetCollectibles().Size - 1
 end
 
-function ItemList(playerid)
+local function ItemList(playerid)
     local itemz = {}
     local max = GetMaxCollectibleID()
-    -- Hackish way to fix game crash when entering Mines II mini game to get knife part 2
-    -- When in stage mining skip geting itemlist seems to be a good hack to avoid it
-    local stage = Game():GetLevel():GetName()
-    --local roomid = Game():GetLevel():GetCurrentRoomIndex()
-    if string.find(stage, 'Mines II') or string.find(stage, 'Ashpit II') or string.find(stage, 'Mines XL') or
-        string.find(stage, 'Ashpit XL') then
+    -- Bypass game crash when entering Mines II mini game to get knife part 2
+	local room = Game():GetRoom()
+	if REPENTANCE and room:HasCurseMist() then
         return itemz
     else
         for i = 0, max, 1 do
@@ -121,7 +120,7 @@ function ItemList(playerid)
     end
 end
 
-function PillEffects()
+local function PillEffects()
     local pillz = {}
     for i = 0, 15, 1 do
         local data = {}
@@ -133,7 +132,7 @@ function PillEffects()
     return pillz
 end
 
-function GetItems(playerid)
+function Memento:GetItems(playerid)
     local p = Game():GetPlayer(playerid)
     local l = Game():GetLevel()
     local msg = {
@@ -152,11 +151,13 @@ function GetItems(playerid)
             slot1 = p:GetPill(1)
         },
         count_item = p:GetCollectibleCount(),
+        --level = l:GetAbsoluteStage(),
+        --room = l:GetCurrentRoomIndex()
     }
     return msg
 end
 
-function GetCharge(playerid)
+function Memento:GetCharge(playerid)
     local p = Game():GetPlayer(playerid)
     local msg = {
         type = "charge-p"..playerid,
@@ -167,7 +168,7 @@ function GetCharge(playerid)
     return msg
 end
 
-function GetRoom()
+function Memento:GetRoom()
     local l = Game():GetLevel()
     local r = l:GetCurrentRoom()
     local d = l:GetCurrentRoomDesc()
@@ -208,7 +209,7 @@ function GetRoom()
     return msg
 end
 
-function GetLevel()
+function Memento:GetLevel()
     local l = Game():GetLevel()
     local function hasRoom(t)
         local rng = RNG()
@@ -223,7 +224,6 @@ function GetLevel()
         type = "level-status",
         level_stage = (l:GetAbsoluteStage()),
         level_angel = (l:GetAngelRoomChance()),
-        level_planetarium = (l:GetPlanetariumChance()),
         level_cursename = (l:GetCurseName()),
         level_curses = (l:GetCurses()),
         level_dungeon_seed = (l:GetDungeonPlacementSeed()),
@@ -255,13 +255,15 @@ function GetLevel()
         level_has_miniboss = hasRoom(RoomType.ROOM_MINIBOSS),
         level_has_chest = hasRoom(RoomType.ROOM_CHEST),
         level_has_greedexit = hasRoom(RoomType.ROOM_GREED_EXIT),
-        level_has_teleporter = hasRoom(RoomType.ROOM_TELEPORTER),
-        level_has_teleporterexit = hasRoom(RoomType.ROOM_TELEPORTER_EXIT),
-        level_has_ultrasecret = hasRoom(RoomType.ROOM_ULTRASECRET),
         pillz = PillEffects()
     }
     if REPENTANCE then
         data.level_has_planetarium = hasRoom(RoomType.ROOM_PLANETARIUM)
+		data.level_planetarium = l:GetPlanetariumChance()
+        data.level_has_teleporter = hasRoom(RoomType.ROOM_TELEPORTER)
+        data.level_has_teleporterexit = hasRoom(RoomType.ROOM_TELEPORTER_EXIT)
+        data.level_has_ultrasecret = hasRoom(RoomType.ROOM_ULTRASECRET)
+
       end
 
     return data
