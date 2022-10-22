@@ -1,9 +1,26 @@
---- Used for TCP
-local socket = require "socket"
+local socket = nil
+local time = nil
+
+local isSandboxed, racingSandbox = pcall(require, "sandbox")
+if isSandboxed then
+	Isaac.DebugString("Sandboxed!")
+    time = racingSandbox.getUnixTime()
+else
+    --- Used for TCP
+    local ok, requiredSocket = pcall(require, "socket")
+    if ok then
+      socket = requiredSocket
+    end
+    
+    --- Used to get current time/date, Isaac.GetTime() is CPU time
+    local ok, requiredOs = pcall(require, "os")
+    if ok then
+      time = requiredOs.time()
+    end
+end
+
 --- Used to send payload in JSON
 local json = require "json"
---- Used to get current time/date, Isaac.GetTime() is CPU time
-local os = require "os"
 
 function Memento:SendMessage(msg)
     local tosend
@@ -15,18 +32,21 @@ function Memento:SendMessage(msg)
                 type = "msg",
                 version = Memento.Version,
                 msg = tostring(msg),
-                epoch = os.time(),
+                epoch = time,
                 ingame_time = Game():GetFrameCount() / 30,
 				cpu_time = Isaac.GetTime()
             }
         else
-          tosend = msg
-			tosend.token = Memento.Token
-			tosend.version = Memento.Version
-			tosend.ingame_time = Game():GetFrameCount() / 30
-			tosend.seed = Game():GetSeeds():GetStartSeedString()
-			tosend.epoch = os.time()
-			tosend.cpu_time = Isaac.GetTime()
+            tosend = msg
+            tosend.token = Memento.Token
+            tosend.version = Memento.Version
+            tosend.ingame_time = Game():GetFrameCount() / 30
+            tosend.seed = Game():GetSeeds():GetStartSeedString()
+            tosend.epoch = time
+            tosend.cpu_time = Isaac.GetTime()
+        end
+        if isSandboxed then
+            tosend.rplus = true
         end
         Memento.Tcpclient:send(json.encode(tosend) .. "\n")
     end
@@ -34,17 +54,22 @@ end
 
 function Memento:TryConnect(initial)
     if initial then
-        -- Memento:VerifyToken()
-        Memento.Tcpclient = socket.tcp()
-        local success = Memento.Tcpclient:connect(Memento.Url, Memento.Port)
-        if success then
-            Memento.Tcpclient:settimeout(0.01)
-            Isaac.DebugString("Done: " .. tostring(Memento.Tcpclient))
-
+        if isSandboxed then
+            Memento.Tcpclient = racingSandbox.connect(Memento.Url, Memento.Port, true)
+            Isaac.DebugString("Done with R+: " .. tostring(Memento.Tcpclient))
             Memento.InitialInit = true
         else
-            Memento.Tcpclient = nil
-            Memento:ClearCallback()
+            Memento.Tcpclient = socket.tcp()
+            local success = Memento.Tcpclient:connect(Memento.Url, Memento.Port)
+            if success then
+                Memento.Tcpclient:settimeout(0.01)
+                Isaac.DebugString("Done: " .. tostring(Memento.Tcpclient))
+
+                Memento.InitialInit = true
+            else
+                Memento.Tcpclient = nil
+                Memento:ClearCallback()
+            end
         end
     end
     if Memento.Tcpclient then
