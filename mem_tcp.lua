@@ -1,10 +1,9 @@
 local socket = nil
-local time = nil
+local os = nil
 
 local isSandboxed, racingSandbox = pcall(require, "sandbox")
 if isSandboxed then
 	Isaac.DebugString("Sandboxed!")
-    time = racingSandbox.getUnixTime()
 else
     --- Used for TCP
     local ok, requiredSocket = pcall(require, "socket")
@@ -15,9 +14,11 @@ else
     --- Used to get current time/date, Isaac.GetTime() is CPU time
     local ok, requiredOs = pcall(require, "os")
     if ok then
-      time = requiredOs.time()
+      os = requiredOs
     end
 end
+
+
 
 --- Used to send payload in JSON
 local json = require "json"
@@ -32,22 +33,25 @@ function Memento:SendMessage(msg)
                 type = "msg",
                 version = Memento.Version,
                 msg = tostring(msg),
-                epoch = time,
                 ingame_time = Game():GetFrameCount() / 30,
 				cpu_time = Isaac.GetTime()
             }
         else
-            tosend = msg
-            tosend.token = Memento.Token
-            tosend.version = Memento.Version
-            tosend.ingame_time = Game():GetFrameCount() / 30
-            tosend.seed = Game():GetSeeds():GetStartSeedString()
-            tosend.epoch = time
-            tosend.cpu_time = Isaac.GetTime()
+          tosend = msg
+			tosend.token = Memento.Token
+			tosend.version = Memento.Version
+			tosend.ingame_time = Game():GetFrameCount() / 30
+			tosend.seed = Game():GetSeeds():GetStartSeedString()
+			tosend.cpu_time = Isaac.GetTime()
         end
-        if isSandboxed then
-            tosend.rplus = true
-        end
+		
+		if isSandboxed then
+			tosend.rplus = true
+			tosend.epoch = racingSandbox.getUnixTime()
+		else
+			tosend.rplus = false
+			tosend.epoch = os.time()
+		end
         Memento.Tcpclient:send(json.encode(tosend) .. "\n")
     end
 end
