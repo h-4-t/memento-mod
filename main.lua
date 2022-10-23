@@ -12,7 +12,7 @@ Memento.InitialInit = false
 Memento.IsItContinue = false
 
 Memento.IconSprite = Sprite()
-Memento.IconSprite:Load("mem_icon.anm2", true)
+Memento.IconSprite:Load("icon.anm2", true)
 
 -- init local variables
 -- local text2print = Game():GetSeeds():GetStartSeedString()
