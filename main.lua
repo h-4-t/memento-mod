@@ -30,6 +30,7 @@ lastHealth.cooldown = daba
 lastStats.cooldown = daba
 lastLoot.cooldown = daba
 lastItems.cooldown = daba
+lastPills.cooldown = daba
 
 function Memento:sendAll()
     Memento:SendMessage(Memento:GetSeed())
@@ -64,6 +65,10 @@ function Memento:sendAll()
         tosend.room = current_r
         Memento:SendMessage(tosend)
 
+        tosend = Memento:GetPillEffects(i)
+        tosend.level = current_l
+        tosend.room = current_r
+        Memento:SendMessage(tosend)
     end
 
 end
