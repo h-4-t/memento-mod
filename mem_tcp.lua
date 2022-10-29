@@ -19,6 +19,13 @@ else
 end
 
 
+function Memento:GetUnixTime()
+    if isSandboxed then
+        return racingSandbox.getUnixTime()
+    else
+        return os.time()
+    end
+end
 
 --- Used to send payload in JSON
 local json = require "json"
@@ -44,13 +51,10 @@ function Memento:SendMessage(msg)
 			tosend.seed = Game():GetSeeds():GetStartSeedString()
 			tosend.cpu_time = Isaac.GetTime()
         end
-		
+        tosend.epoch = Memento:GetUnixTime()
+
 		if isSandboxed then
-			tosend.rplus = true
-			tosend.epoch = racingSandbox.getUnixTime()
-		else
-			tosend.rplus = false
-			tosend.epoch = os.time()
+			tosend.sandbox = true
 		end
         Memento.Tcpclient:send(json.encode(tosend) .. "\n")
     end

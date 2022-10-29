@@ -13,7 +13,7 @@ function Memento:GetHealth(playerid)
     local p = Game():GetPlayer(playerid)
 
     local msg = {
-        type = "health-p"..playerid,
+        type = "health-p" .. playerid,
         playertype = p:GetPlayerType(),
         red = p:GetHearts(),
         max_red = p:GetMaxHearts(),
@@ -25,26 +25,45 @@ function Memento:GetHealth(playerid)
         life = p:GetExtraLives(),
         has_fullred = p:HasFullHearts(),
         has_fullredsoul = p:HasFullHeartsAndSoulHearts(),
-        jar_hearts = p:GetJarHearts() 
+        jar_hearts = p:GetJarHearts(),
+        -- CollectibleType.COLLECTIBLE_HOLY_MANTLE = 313
+        holy_mantle = p:GetEffects():HasCollectibleEffect(313)
     }
     if REPENTANCE then
-		msg.bone = p:GetBoneHearts()
+        msg.bone = p:GetBoneHearts()
         msg.broken = p:GetBrokenHearts()
         msg.rotten = p:GetRottenHearts()
         msg.soul_charge = p:GetSoulCharge()
         msg.soul_effective = p:GetSoulCharge()
         msg.blood_charge = p:GetBloodCharge()
-        msg.poop_mana =  p:GetPoopMana()
-		msg.max_all = p:GetEffectiveMaxHearts()
+        msg.poop_mana = p:GetPoopMana()
+        msg.max_all = p:GetEffectiveMaxHearts()
     end
     return msg
 end
 
+-- https://moddingofisaac.com/docs/rep/enums/PlayerForm.html
+local function GetTransforms(playerid)
+    local forms = {}
+    local maxforms = 0
+    if REPENTANCE then
+        maxforms = 14
+    else
+        maxforms = 12
+    end
+    local p = Game():GetPlayer(playerid)
+    for i = 0, maxforms, 1 do
+        if p:HasPlayerForm(i) == true then
+            table.insert(forms, i)
+        end
+    end
+    return forms
+end
+
 function Memento:GetPlayer(playerid)
     local p = Game():GetPlayer(playerid)
-    
     local msg = {
-        type = "player-p"..playerid,
+        type = "player-p" .. playerid,
         canfly = p.CanFly,
         damage = p.Damage,
         luck = p.Luck,
@@ -58,10 +77,11 @@ function Memento:GetPlayer(playerid)
         name = p:GetName(),
         playertype = p:GetPlayerType(),
         damage_taken = p:GetTotalDamageTaken(),
+        transforms = GetTransforms(playerid),
     }
     if REPENTANCE then
         msg.tearrange = p.TearRange
-      end
+    end
 
     return msg
 end
@@ -87,14 +107,14 @@ end
 function Memento:GetLoot(playerid)
     local p = Game():GetPlayer(playerid)
     local msg = {
-        type = "loot-p"..playerid,
+        type = "loot-p" .. playerid,
         count_bombs = p:GetNumBombs(),
         count_coins = p:GetNumCoins(),
         count_keys = p:GetNumKeys(),
         has_gold_key = p:HasGoldenKey(),
         has_gold_bomb = p:HasGoldenBomb(),
         --is_holdingitem = p:IsHoldingItem(),
-        count_collectible = p:GetCollectibleCount()
+        --count_collectible = p:GetCollectibleCount()
     }
     return msg
 end
@@ -107,8 +127,9 @@ local function ItemList(playerid)
     local itemz = {}
     local max = GetMaxCollectibleID()
     -- Bypass game crash when entering Mines II mini game to get knife part 2
-	local room = Game():GetRoom()
-	if REPENTANCE and room:HasCurseMist() then
+    local r = Game():GetRoom()
+    local l = Game():GetLevel()
+    if REPENTANCE and r:HasCurseMist() then
         return itemz
     else
         for i = 0, max, 1 do
@@ -120,23 +141,34 @@ local function ItemList(playerid)
     end
 end
 
-local function PillEffects()
+function Memento:GetPillEffects(playerid)
+    local msg = {
+        type = "pills-p" .. playerid,
+    }
     local pillz = {}
-    for i = 0, 15, 1 do
+    local maxpillz = 0
+    if REPENTANCE then
+        maxpillz = 15
+    else
+        -- AB+ has 13 pill colors
+        maxpillz = 13
+    end
+    for i = 0, maxpillz, 1 do
         local data = {}
         data.color = i
-        data.effect = Game():GetItemPool():GetPillEffect(i, Game():GetPlayer(0))
+        data.identified = Game():GetItemPool():IsPillIdentified(i)
+        data.effect = Game():GetItemPool():GetPillEffect(i, Game():GetPlayer(playerid))
         table.insert(pillz, data)
     end
-
-    return pillz
+    msg.pills = pillz
+    return msg
 end
 
 function Memento:GetItems(playerid)
     local p = Game():GetPlayer(playerid)
     local l = Game():GetLevel()
     local msg = {
-        type = "item-p"..playerid,
+        type = "item-p" .. playerid,
         items = ItemList(playerid),
         cards = {
             slot0 = p:GetCard(0),
@@ -151,8 +183,6 @@ function Memento:GetItems(playerid)
             slot1 = p:GetPill(1)
         },
         count_item = p:GetCollectibleCount(),
-        --level = l:GetAbsoluteStage(),
-        --room = l:GetCurrentRoomIndex()
     }
     return msg
 end
@@ -160,10 +190,10 @@ end
 function Memento:GetCharge(playerid)
     local p = Game():GetPlayer(playerid)
     local msg = {
-        type = "charge-p"..playerid,
+        type = "charge-p" .. playerid,
         hasActiveItem = (p:GetActiveItem() ~= -1),
         needsCharge = p:NeedsCharge(),
-        slots = {p:GetActiveItem(0), p:GetActiveItem(1), p:GetActiveItem(2), p:GetActiveItem(3)}
+        slots = { p:GetActiveItem(0), p:GetActiveItem(1), p:GetActiveItem(2), p:GetActiveItem(3) }
     }
     return msg
 end
@@ -196,6 +226,7 @@ function Memento:GetRoom()
         room_count_boss = r:GetAliveBossesCount(),
         room_count_enem = r:GetAliveEnemiesCount(),
         room_devil = r:GetDevilRoomChance(),
+        room_angel = l:GetAngelRoomChance(),
         room_delirium = r:GetDeliriumDistance(),
         room_dungeonrock = r:GetDungeonRockIdx(),
         room_redheart_damage = r:GetRedHeartDamage(),
@@ -220,6 +251,7 @@ function Memento:GetLevel()
         local idx3 = Game():GetLevel():QueryRoomTypeIndex(t, false, rng)
         return (idx1 ~= -1) and (idx1 == idx2) and (idx1 == idx3)
     end
+
     local data = {
         type = "level-status",
         level_stage = (l:GetAbsoluteStage()),
@@ -254,17 +286,16 @@ function Memento:GetLevel()
         level_has_bossrush = hasRoom(RoomType.ROOM_BOSSRUSH),
         level_has_miniboss = hasRoom(RoomType.ROOM_MINIBOSS),
         level_has_chest = hasRoom(RoomType.ROOM_CHEST),
-        level_has_greedexit = hasRoom(RoomType.ROOM_GREED_EXIT),
-        pillz = PillEffects()
+        level_has_greedexit = hasRoom(RoomType.ROOM_GREED_EXIT)
     }
     if REPENTANCE then
         data.level_has_planetarium = hasRoom(RoomType.ROOM_PLANETARIUM)
-		data.level_planetarium = l:GetPlanetariumChance()
+        data.level_planetarium = l:GetPlanetariumChance()
         data.level_has_teleporter = hasRoom(RoomType.ROOM_TELEPORTER)
         data.level_has_teleporterexit = hasRoom(RoomType.ROOM_TELEPORTER_EXIT)
         data.level_has_ultrasecret = hasRoom(RoomType.ROOM_ULTRASECRET)
 
-      end
+    end
 
     return data
 end
