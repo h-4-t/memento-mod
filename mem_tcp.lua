@@ -57,6 +57,9 @@ function Memento:SendMessage(msg)
 			tosend.sandbox = true
 		end
         Memento.Tcpclient:send(json.encode(tosend) .. "\n")
+	else
+        Memento:TryConnect(true)
+        Memento:SendMessage(msg)
     end
 end
 
