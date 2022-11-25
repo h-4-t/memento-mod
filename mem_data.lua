@@ -242,19 +242,23 @@ end
 
 function Memento:GetLevel()
     local l = Game():GetLevel()
-    local function hasRoom(t)
-        local rng = RNG()
-        local idx1 = Game():GetLevel():QueryRoomTypeIndex(t, false, rng)
-        rng:Next()
-        local idx2 = Game():GetLevel():QueryRoomTypeIndex(t, false, rng)
-        rng:Next()
-        local idx3 = Game():GetLevel():QueryRoomTypeIndex(t, false, rng)
-        return (idx1 ~= -1) and (idx1 == idx2) and (idx1 == idx3)
-    end
+    -- Deprecated : schrodinger's cat effect
+    -- Games RNG seems to affected by checking if RoomTypes exists
+    
+    -- local function hasRoom(t)
+    --     local rng = RNG()
+    --     local idx1 = Game():GetLevel():QueryRoomTypeIndex(t, false, rng)
+    --     rng:Next()
+    --     local idx2 = Game():GetLevel():QueryRoomTypeIndex(t, false, rng)
+    --     rng:Next()
+    --     local idx3 = Game():GetLevel():QueryRoomTypeIndex(t, false, rng)
+    --     return (idx1 ~= -1) and (idx1 == idx2) and (idx1 == idx3)
+    -- end
 
     local data = {
         type = "level-status",
         level_stage = (l:GetAbsoluteStage()),
+		level_stage_type = (l:GetStageType()),
         level_angel = (l:GetAngelRoomChance()),
         level_cursename = (l:GetCurseName()),
         level_curses = (l:GetCurses()),
@@ -265,37 +269,36 @@ function Memento:GetLevel()
         level_has_bosschal = (l:HasBossChallenge()),
         level_is_alt = (l:IsAltStage()),
         level_nextstage = (l:IsNextStageAvailable()),
-        level_dungeon_returnidx = (l.DungeonReturnRoomIndex),
-        level_has_shop = hasRoom(RoomType.ROOM_SHOP),
-        level_has_treasure = hasRoom(RoomType.ROOM_TREASURE),
-        level_has_secret = hasRoom(RoomType.ROOM_SECRET),
-        level_has_angel = hasRoom(RoomType.ROOM_ANGEL),
-        level_has_devil = hasRoom(RoomType.ROOM_DEVIL),
-        level_has_supersecret = hasRoom(RoomType.ROOM_SUPERSECRET),
-        level_has_arcade = hasRoom(RoomType.ROOM_ARCADE),
-        level_has_sacrifice = hasRoom(RoomType.ROOM_SACRIFICE),
-        level_has_curse = hasRoom(RoomType.ROOM_CURSE),
-        level_has_challenge = hasRoom(RoomType.ROOM_CHALLENGE),
-        level_has_library = hasRoom(RoomType.ROOM_LIBRARY),
-        level_has_dungeon = hasRoom(RoomType.ROOM_DUNGEON),
-        level_has_isaacs = hasRoom(RoomType.ROOM_ISAACS),
-        level_has_barren = hasRoom(RoomType.ROOM_BARREN),
-        level_has_dice = hasRoom(RoomType.ROOM_DICE),
-        level_has_error = hasRoom(RoomType.ROOM_ERROR),
-        level_has_blackmarket = hasRoom(RoomType.ROOM_BLACK_MARKET),
-        level_has_bossrush = hasRoom(RoomType.ROOM_BOSSRUSH),
-        level_has_miniboss = hasRoom(RoomType.ROOM_MINIBOSS),
-        level_has_chest = hasRoom(RoomType.ROOM_CHEST),
-        level_has_greedexit = hasRoom(RoomType.ROOM_GREED_EXIT)
+        level_dungeon_returnidx = (l.DungeonReturnRoomIndex)
+        -- level_has_shop = hasRoom(RoomType.ROOM_SHOP),
+        -- level_has_treasure = hasRoom(RoomType.ROOM_TREASURE),
+        -- level_has_secret = hasRoom(RoomType.ROOM_SECRET),
+        -- level_has_angel = hasRoom(RoomType.ROOM_ANGEL),
+        -- level_has_devil = hasRoom(RoomType.ROOM_DEVIL),
+        -- level_has_supersecret = hasRoom(RoomType.ROOM_SUPERSECRET),
+        -- level_has_arcade = hasRoom(RoomType.ROOM_ARCADE),
+        -- level_has_sacrifice = hasRoom(RoomType.ROOM_SACRIFICE),
+        -- level_has_curse = hasRoom(RoomType.ROOM_CURSE),
+        -- level_has_challenge = hasRoom(RoomType.ROOM_CHALLENGE),
+        -- level_has_library = hasRoom(RoomType.ROOM_LIBRARY),
+        -- level_has_dungeon = hasRoom(RoomType.ROOM_DUNGEON),
+        -- level_has_isaacs = hasRoom(RoomType.ROOM_ISAACS),
+        -- level_has_barren = hasRoom(RoomType.ROOM_BARREN),
+        -- level_has_dice = hasRoom(RoomType.ROOM_DICE),
+        -- level_has_error = hasRoom(RoomType.ROOM_ERROR),
+        -- level_has_blackmarket = hasRoom(RoomType.ROOM_BLACK_MARKET),
+        -- level_has_bossrush = hasRoom(RoomType.ROOM_BOSSRUSH),
+        -- level_has_miniboss = hasRoom(RoomType.ROOM_MINIBOSS),
+        -- level_has_chest = hasRoom(RoomType.ROOM_CHEST),
+        -- level_has_greedexit = hasRoom(RoomType.ROOM_GREED_EXIT)
     }
-    if REPENTANCE then
-        data.level_has_planetarium = hasRoom(RoomType.ROOM_PLANETARIUM)
-        data.level_planetarium = l:GetPlanetariumChance()
-        data.level_has_teleporter = hasRoom(RoomType.ROOM_TELEPORTER)
-        data.level_has_teleporterexit = hasRoom(RoomType.ROOM_TELEPORTER_EXIT)
-        data.level_has_ultrasecret = hasRoom(RoomType.ROOM_ULTRASECRET)
-
-    end
+    -- if REPENTANCE then
+    --     data.level_has_planetarium = hasRoom(RoomType.ROOM_PLANETARIUM)
+    --     data.level_planetarium = l:GetPlanetariumChance()
+    --     data.level_has_teleporter = hasRoom(RoomType.ROOM_TELEPORTER)
+    --     data.level_has_teleporterexit = hasRoom(RoomType.ROOM_TELEPORTER_EXIT)
+    --     data.level_has_ultrasecret = hasRoom(RoomType.ROOM_ULTRASECRET)
+    -- end
 
     return data
 end
