@@ -2,9 +2,14 @@
 <metadata>
     <name>Memento</name>
     <directory>memento</directory>
-    <id>0</id>
-    <description>Isaac's Diary</description>
-    <version>1.0</version>
+    <id></id>
+    <description>
+    A cloud-based HUD for The Binding of Isaac Game to:
+    - Track your skill progress over time
+    - Share your best runs with your friends
+    - Help the community explore the complexity and randomness of the game
+</description>
+    <version>0.9</version>
     <visibility>Public</visibility>
     <tag id="Lua"/>
 </metadata>

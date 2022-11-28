@@ -1,7 +1,6 @@
 local function cntBits(num)
     local r = 0
     for i = 0, 11 do
-        -- Need to find a way to escape this lint error here
         if (num >> i) % 2 ~= 0 then
             r = r + 1
         end
@@ -244,7 +243,7 @@ function Memento:GetLevel()
     local l = Game():GetLevel()
     -- Deprecated : schrodinger's cat effect
     -- Games RNG seems to affected by checking if RoomTypes exists
-    
+
     -- local function hasRoom(t)
     --     local rng = RNG()
     --     local idx1 = Game():GetLevel():QueryRoomTypeIndex(t, false, rng)
@@ -258,7 +257,7 @@ function Memento:GetLevel()
     local data = {
         type = "level-status",
         level_stage = (l:GetAbsoluteStage()),
-		level_stage_type = (l:GetStageType()),
+        level_stage_type = (l:GetStageType()),
         level_angel = (l:GetAngelRoomChance()),
         level_cursename = (l:GetCurseName()),
         level_curses = (l:GetCurses()),
