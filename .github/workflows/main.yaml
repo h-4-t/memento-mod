@@ -14,9 +14,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup steamcmd
-      uses: CyberAndrii/setup-steamcmd@v1
-
     - name: Clean mod files
       run: |
         mkdir -p $content_dir
@@ -25,6 +22,9 @@ jobs:
         ls -la $content_dir/
       env:
         content_dir: ${{ github.workspace }}/mod/
+
+    - name: Setup steamcmd
+      uses: CyberAndrii/setup-steamcmd@v1
 
     - name: Create config file
       run: |
