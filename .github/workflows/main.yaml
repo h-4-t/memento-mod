@@ -20,7 +20,8 @@ jobs:
     - name: Clean mod files
       run: |
         mkdir -p $content_dir
-        mv * $content_dir/
+        shopt -s extglob
+        mv !(mod) mod
         ls -la $content_dir/
       env:
         content_dir: ${{ github.workspace }}/mod/
