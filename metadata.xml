@@ -2,12 +2,16 @@
 <metadata>
     <name>Memento</name>
     <directory>memento</directory>
-    <id></id>
+    <id>2894947933</id>
     <description>
-    A cloud-based HUD for The Binding of Isaac Game to:
-    - Track your skill progress over time
-    - Share your best runs with your friends
-    - Help the community explore the complexity and randomness of the game
+A cloud-based HUD for The Binding of Isaac Game to:
+- Track your skill progress over time
+- Share your best runs with your friends
+- Help the community explore the complexity and randomness of the game
+
+As web-scaling is more of a witchcraft than an exact science, it is currently on a CLOSED/INVITE-ONLY BETA status.
+
+More info: https://about.memento.ma/guide/register
 </description>
     <version>0.9</version>
     <visibility>Public</visibility>

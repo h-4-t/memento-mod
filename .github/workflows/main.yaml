@@ -36,7 +36,7 @@ jobs:
           "workshopitem"
           {
            "appid"  "250900"
-           "publishedfileid"  "2894902394"
+           "publishedfileid"  "2894947933"
            "contentfolder"  "${{ github.workspace }}/mod/"
            "changenote"  "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
           }
@@ -55,12 +55,12 @@ jobs:
       run: >-
         steamcmd
         +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" "${{ secrets.STEAM_OTP }}"
-        +workshop_download_item 250900 2894902394
+        +workshop_download_item 250900 2894947933
         +quit
     - name: Verify content equality
       run: cmp $original_content_file $HOME$downloaded_content_file
       env:
         original_content_file: ${{ github.workspace }}/mod/metadata.xml
-        downloaded_content_file: /Steam/steamapps/workshop/content/250900/2894902394/metadata.xml
+        downloaded_content_file: /Steam/steamapps/workshop/content/250900/2894947933/metadata.xml
 
 
