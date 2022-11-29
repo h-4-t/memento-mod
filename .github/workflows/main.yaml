@@ -44,7 +44,7 @@ jobs:
     - name: Upload to workshop
       run: >-
         steamcmd
-        +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}"
+        +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" PYJRJ
         +workshop_build_item "${{ github.workspace }}/workshop_build.vdf"
         +quit
 
@@ -54,7 +54,7 @@ jobs:
     - name: Download from workshop
       run: >-
         steamcmd
-        +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}"
+        +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}" PYJRJ
         +workshop_download_item 250900 2894902394
         +quit
     - name: Verify content equality
