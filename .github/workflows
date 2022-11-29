@@ -1,0 +1,65 @@
+name: Integration test
+
+on:
+  push:
+    branches: [ 'main' ]
+
+jobs:
+  upload-to-workshop:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest ]
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup steamcmd
+      uses: CyberAndrii/setup-steamcmd@v1
+
+    - name: Clean mod files
+      run: |
+        mkdir -p $content_dir
+        mv * $content_dir/
+        ls -la $content_dir/
+      env:
+        content_dir: ${{ github.workspace }}/mod/
+
+    - name: Create config file
+      run: |
+        echo $content >> $config_file
+        cat $config_file
+      env:
+        config_file: ${{ github.workspace }}/workshop_build.vdf
+        content: >
+          "workshopitem"
+          {
+           "appid"  "250900"
+           "publishedfileid"  "2894902394"
+           "contentfolder"  "${{ github.workspace }}/mod/"
+           "changenote"  "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          }
+
+    - name: Upload to workshop
+      run: >-
+        steamcmd
+        +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}"
+        +workshop_build_item "${{ github.workspace }}/workshop_build.vdf"
+        +quit
+
+    - name: Wait
+      run: sleep 30s
+
+    - name: Download from workshop
+      run: >-
+        steamcmd
+        +login "${{ secrets.STEAM_USERNAME }}" "${{ secrets.STEAM_PASSWORD }}"
+        +workshop_download_item 250900 2894902394
+        +quit
+    - name: Verify content equality
+      run: cmp $original_content_file $HOME$downloaded_content_file
+      env:
+        original_content_file: ${{ github.workspace }}/mod/metadata.xml
+        downloaded_content_file: /Steam/steamapps/workshop/content/250900/2894902394/metadata.xml
+
+
