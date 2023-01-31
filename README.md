@@ -4,6 +4,8 @@
 
 > As web-scaling is more of a witchcraft than an exact science, it is currently on a **closed/invite-only beta** status.
 
+More info available here : https://about.memento.ma
+
 ## About
 
 Memento is a cloud-based HUD for The Binding of Isaac game (AB+/Repentance). It gives you the ability to :
@@ -36,3 +38,5 @@ Memento's mod became simply a way to **live datamine** the game's info and save 
 
 ### Dashboard view
 ![dashboard](./resources/screen_dashboard.png)
+
+
