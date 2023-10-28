@@ -77,7 +77,7 @@ end
 function mod:init(player)
     Isaac.DebugString("Initialize networking...")
 
-    Memento:TryConnect(false)
+    Memento:TryConnect()
 end
 
 function mod:render()
@@ -290,7 +290,7 @@ local function onStart(_, bool)
     else
         msg.isaac = "AB+"
     end
-    Memento:TryConnect(true)
+    Memento:TryConnect()
 
     Memento:SendMessage(msg)
     -- clearVars()

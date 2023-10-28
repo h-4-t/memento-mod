@@ -63,27 +63,25 @@ function Memento:SendMessage(msg)
     end
 end
 
-function Memento:TryConnect(initial)
-    if initial then
-        if isSandboxed then
-            Memento.Tcpclient = racingSandbox.connect(Memento.Url, Memento.Port, true)
+function Memento:TryConnect()
+    if isSandboxed and racingSandbox.isSocketInitialized then
+        Memento.Tcpclient = racingSandbox.connect(Memento.Url, Memento.Port, true)
+        if Memento.Tcpclient == nil then
+            Memento:ClearCallback()
+        else
             Isaac.DebugString("Done with R+: " .. tostring(Memento.Tcpclient))
             Memento.InitialInit = true
-        else
-            Memento.Tcpclient = socket.tcp()
-            local success = Memento.Tcpclient:connect(Memento.Url, Memento.Port)
-            if success then
-                Memento.Tcpclient:settimeout(0.01)
-                Isaac.DebugString("Done: " .. tostring(Memento.Tcpclient))
+        end
+    else
+        Memento.Tcpclient = socket.tcp()
+        local success = Memento.Tcpclient:connect(Memento.Url, Memento.Port)
+        if success then
+            Isaac.DebugString("Done: " .. tostring(Memento.Tcpclient))
 
-                Memento.InitialInit = true
-            else
-                Memento.Tcpclient = nil
-                Memento:ClearCallback()
-            end
+            Memento.InitialInit = true
+        else
+            Memento.Tcpclient = nil
+            Memento:ClearCallback()
         end
     end
-    if Memento.Tcpclient then
-        return
-	end
 end
