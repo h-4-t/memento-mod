@@ -44,7 +44,7 @@ end
 -- https://moddingofisaac.com/docs/rep/enums/PlayerForm.html
 local function GetTransforms(playerid)
     local forms = {}
-    local maxforms = 0
+    local maxforms
     if REPENTANCE then
         maxforms = 14
     else
@@ -87,7 +87,6 @@ end
 
 function Memento:GetSeed()
     local s = Game():GetSeeds()
-    local l = Game():GetLevel()
 
     local msg = {
         type = "seed-status",
@@ -127,7 +126,6 @@ local function ItemList(playerid)
     local max = GetMaxCollectibleID()
     -- Bypass game crash when entering Mines II mini game to get knife part 2
     local r = Game():GetRoom()
-    local l = Game():GetLevel()
     if REPENTANCE and r:HasCurseMist() then
         return itemz
     else
@@ -145,7 +143,7 @@ function Memento:GetPillEffects(playerid)
         type = "pills-p" .. playerid,
     }
     local pillz = {}
-    local maxpillz = 0
+    local maxpillz
     if REPENTANCE then
         maxpillz = 15
     else
@@ -165,7 +163,6 @@ end
 
 function Memento:GetItems(playerid)
     local p = Game():GetPlayer(playerid)
-    local l = Game():GetLevel()
     local msg = {
         type = "item-p" .. playerid,
         items = ItemList(playerid),

@@ -8,7 +8,12 @@
         "ModCallbacks",
         "RegisterMod",
         "Sprite",
-        "Vector"
-
-    ]
+        "Vector",
+        "Memento",
+        "require"
+    ],
+    "sonarlint.connectedMode.project": {
+        "connectionId": "sonar-tolimat-me",
+        "projectKey": "ops_memento_lua-mod_AYt2ZClbFmkrpxeZc5cp"
+    }
 }

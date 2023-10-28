@@ -5,14 +5,14 @@ local isSandboxed, racingSandbox = pcall(require, "sandbox")
 if isSandboxed then
 	Isaac.DebugString("Sandboxed!")
 else
+    local ok, requiredSocket, requiredOs
     --- Used for TCP
-    local ok, requiredSocket = pcall(require, "socket")
+    ok, requiredSocket = pcall(require, "socket")
     if ok then
       socket = requiredSocket
     end
-    
     --- Used to get current time/date, Isaac.GetTime() is CPU time
-    local ok, requiredOs = pcall(require, "os")
+    ok, requiredOs = pcall(require, "os")
     if ok then
       os = requiredOs
     end
@@ -58,7 +58,7 @@ function Memento:SendMessage(msg)
 		end
         Memento.Tcpclient:send(json.encode(tosend) .. "\n")
 	else
-        Memento:TryConnect(true)
+        Memento:TryConnect()
         Memento:SendMessage(msg)
     end
 end

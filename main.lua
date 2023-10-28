@@ -75,7 +75,7 @@ function Memento:sendAll()
 
 end
 
-function mod:init(player)
+function mod:init()
     Isaac.DebugString("Initialize networking...")
 
     Memento:TryConnect()
@@ -122,7 +122,6 @@ function mod:update()
 
 
     local l = Game():GetLevel()
-    local r = l:GetCurrentRoomDesc()
     local s = Game():GetSeeds()
     local t = (Game().TimeCounter) / 30
 
@@ -147,10 +146,6 @@ function mod:update()
         end
 
         Memento:SendMessage(msg)
-        -- check if it is a greed mode run
-        if Game().isGreedMode then
-            isGreedMode = true
-        end
         -- Initialize global variables
         for i = 0, Game():GetNumPlayers() - 1 do
             lastCharge[i] = Memento:GetCharge(i)
@@ -176,7 +171,6 @@ function mod:update()
         Memento:sendAll()
     else
         for i = 0, Game():GetNumPlayers() - 1 do
-            local p = Game():GetPlayer(i)
 
             if (t - lastCharge.cooldown > 0.5) then
 
