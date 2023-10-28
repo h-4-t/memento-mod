@@ -24,6 +24,7 @@ local lastLoot = {}
 local lastSeed = {}
 local lastItems = {}
 local lastPills = {}
+local greedModeWave = 0
 
 local daba = (Game().TimeCounter) / 30
 lastCharge.cooldown = daba
@@ -144,9 +145,12 @@ function mod:update()
         else
             msg.isaac = "AB+"
         end
-        -- Memento:TryConnect(false)
-        Memento:SendMessage(msg)
 
+        Memento:SendMessage(msg)
+        -- check if it is a greed mode run
+        if Game().isGreedMode then
+            isGreedMode = true
+        end
         -- Initialize global variables
         for i = 0, Game():GetNumPlayers() - 1 do
             lastCharge[i] = Memento:GetCharge(i)
@@ -269,6 +273,11 @@ function mod:update()
                 lastSeed = Memento:GetSeed()
             end
 
+            if l.GreedModeWave > greedModeWave then
+                Memento:SendMessage(Memento:GetRoomEntities())
+                greedModeWave = l.GreedModeWave
+            end
+
         end
     end
 
@@ -291,7 +300,6 @@ local function onStart(_, bool)
         msg.isaac = "AB+"
     end
     Memento:TryConnect()
-
     Memento:SendMessage(msg)
     -- clearVars()
 end
@@ -341,6 +349,7 @@ end
 
 local function onNewLevel()
     Memento:sendAll()
+    greedModeWave = 0
     -- Memento:SendMessage(GetLevel())
     -- Memento:SendMessage(GetRoom())
 end
@@ -360,27 +369,8 @@ end
 -- end
 
 local function onNewRoom()
-
-    local room = Memento:GetRoom()
-    if not room.Clear then
-        local entities = {}
-        for _, v in pairs(Isaac.GetRoomEntities()) do
-            -- selecting only enemies
-            if (v.Type ~= 1000 and v.Type ~= 9001 and v.Type > 9) then
-                local entity = {
-                    type = v.Type,
-                    variant = v.Variant,
-                    subtype = v.SubType
-                }
-                table.insert(entities, entity)
-            end
-        end
-        room.entities = entities
-
-    end
-
+    local room = Memento:GetRoomEntities()
     Memento:SendMessage(room)
-
 end
 
 mod:AddCallback(ModCallbacks.MC_POST_PLAYER_INIT, mod.init)

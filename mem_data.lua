@@ -301,3 +301,24 @@ function Memento:GetLevel()
 
     return data
 end
+
+
+function Memento:GetRoomEntities()
+    local room = Memento:GetRoom()
+    if not room.Clear then
+        local entities = {}
+        for _, v in pairs(Isaac.GetRoomEntities()) do
+            -- selecting only enemies
+            if (v.Type ~= 1000 and v.Type ~= 9001 and v.Type > 9) then
+                local entity = {
+                    type = v.Type,
+                    variant = v.Variant,
+                    subtype = v.SubType
+                }
+                table.insert(entities, entity)
+            end
+        end
+        room.entities = entities
+    end
+    return room
+end
