@@ -9,8 +9,8 @@
 - [[769866a9]](https://github.com/h-4-t/memento-mod/commit/769866a9eb5d22c6b46ae3dc409b6876b666c701) Fixed critical freeze when no connection is available
 
 ### Code Maintenance
+- [[abc71a9]](https://github.com/h-4-t/memento-mod/commit/abc71a94fe4d3f01909f3d551b5c281be3027f11) Added a CHANGELOG
 - Started following [SemVer](https://semver.org) properly
-
 ****
 
 ## [0.8.1] - 2023-01-31

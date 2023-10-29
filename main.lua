@@ -7,7 +7,7 @@ require "mem_config"
 require "mem_tcp"
 require "mem_data"
 
-Memento.Version = "0.9.0"
+Memento.Version = "0.9.1"
 Memento.Tcpclient = nil
 Memento.InitialInit = false
 Memento.IsItContinue = false
