@@ -1,3 +1,15 @@
+<a name="unreleased"></a>
+## [[Unreleased]]
+
+
+<a name="0.9.1"></a>
+## [[0.9.1]] - 2023-10-29
+
+### Code Maintenance
+- [[c8de61f]](https://github.com/h-4-t/memento-mod/commit/c8de61fd8e3b335eaf4f3196b69c4c8c62c0d849) Added a github action for release
+- [[aa92308]](https://github.com/h-4-t/memento-mod/commit/aa92308a03c79fc1937461e886b7a1004001f0c4) Added a Makefile & Changelog automation
+
+****
 ## [0.9.0] - 2023-10-28
 
 ### Features
@@ -103,3 +115,8 @@ Initial commit
 
 - [[ad14963]](https://github.com/h-4-t/memento-mod/commit/ad149631bf7596209bfaf145bc46600e158598d2)
 Chore README.md    
+
+****
+[Unreleased]: https://github.com/h-4-t/memento-mod/compare/0.9.1...HEAD
+[0.9.1]: https://github.com/h-4-t/memento-mod/compare/0.9.0...0.9.1
+
