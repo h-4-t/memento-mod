@@ -1,9 +1,13 @@
 <a name="unreleased"></a>
 ## [[Unreleased]]
 
+<a name="0.9.2"></a>
+## [[0.9.2]] - 2023-10-29
+### Bug Fixes
+- [[9f0cf98]](https://github.com/h-4-t/memento-mod/commit/9f0cf98e10fe06fb7b24ef5213944b6a1899faea) Renamed config file to avoid replacing existing file
 
-<a name="0.9.1"></a>
-## [[0.9.1]] - 2023-10-29
+****
+## [0.9.1] - 2023-10-29
 
 ### Code Maintenance
 - [[c8de61f]](https://github.com/h-4-t/memento-mod/commit/c8de61fd8e3b335eaf4f3196b69c4c8c62c0d849) Added a github action for release
@@ -117,5 +121,5 @@ Initial commit
 Chore README.md    
 
 ****
-[Unreleased]: https://github.com/h-4-t/memento-mod/compare/0.9.1...HEAD
-
+[Unreleased]: https://github.com/h-4-t/memento-mod/compare/0.9.2...HEAD
+[0.9.2]: https://github.com/h-4-t/memento-mod/compare/0.9.1...0.9.2
