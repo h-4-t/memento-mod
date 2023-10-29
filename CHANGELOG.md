@@ -118,5 +118,4 @@ Chore README.md
 
 ****
 [Unreleased]: https://github.com/h-4-t/memento-mod/compare/0.9.1...HEAD
-[0.9.1]: https://github.com/h-4-t/memento-mod/compare/0.9.0...0.9.1
 
